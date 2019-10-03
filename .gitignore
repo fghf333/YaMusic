@@ -1,0 +1,9 @@
+.idea/*
+*test*
+*__pycache__*
+build/*
+dist/*
+cache/*
+!cache/.gitkeep
+player2.py
+setup.py
