@@ -8,9 +8,10 @@ NSObject = objc.lookUpClass("NSObject")
 class NotificationDelegator(NSObject):
 
     def userNotificationCenter_didActivateNotification_(self, center, notification):
-        print("user notification center")
+        print("Activate notification")
 
     def userNotificationCenter_shouldPresentNotification_(self, center, notification):
+        print("Should present notification")
         return True
 
 

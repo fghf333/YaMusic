@@ -124,7 +124,9 @@ class MainPanel(object):
         self.play_pause_btn = buttons.GenBitmapToggleButton(self.main_pnl, bitmap=img, name="play")
         self.play_pause_btn.Enable(False)
 
-        img = wx.Bitmap(os.path.join(self.bitmapDir, "player_pause.png"))
+        img = wx.Image(os.path.join(self.bitmapDir, "player_pause.png"), wx.BITMAP_TYPE_ANY)
+        img = img.Scale(30, 30, wx.IMAGE_QUALITY_HIGH)
+        img = wx.Bitmap(img)
         self.play_pause_btn.SetBitmapSelected(img)
         self.play_pause_btn.SetInitialSize()
 
