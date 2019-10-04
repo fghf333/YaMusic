@@ -1,0 +1,2 @@
+yandex-music==0.0.12
+wxPython==4.0.6
