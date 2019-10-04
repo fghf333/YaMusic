@@ -59,6 +59,7 @@ class MainPanel(object):
         # and put some text with a larger bold font on it
         label = "Hello " + self.api.get_display_name()
         self.parent.st = wx.StaticText(main_pnl, label=label, name="greetings")
+        self.parent.st.SetForegroundColour(self.conf.get_attr("TEXT_COLOR"))
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         work_sizer = wx.BoxSizer(wx.HORIZONTAL)
