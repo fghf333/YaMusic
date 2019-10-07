@@ -4,6 +4,7 @@ from yandex_music.exceptions import BadRequest
 from GUI.builders import Builders
 from configs.configs import Configs
 from music.API import YandexAPI
+from notification.notification import notify
 
 
 class Login(object):
@@ -112,7 +113,7 @@ class Login(object):
             self.api.login(login=login, password=password)
             popup = self.parent.FindWindowByName("login_popup")
             popup.Destroy()
-            self.main_pnl.change_greeting_message(self.api.get_display_name())
+            notify(subtitle="Hello " + self.api.get_display_name())
             self.parent.playlist_selection.Enable(True)
             self.parent.make_menu()
         except BadRequest as e:
@@ -125,6 +126,5 @@ class Login(object):
 
     def on_logout_menu(self, event):
         self.api.logout()
-        self.main_pnl.change_greeting_message()
         self.create_login_popup()
         self.parent.make_menu()

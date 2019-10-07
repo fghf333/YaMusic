@@ -24,7 +24,6 @@ class MainPanel(object):
         pass
 
         self.main_pnl = wx.Panel(parent)
-        self.st = wx.StaticText()
         self.playback_slider = None
         self.play_pause_btn = None
         self.next_track = None
@@ -51,50 +50,26 @@ class MainPanel(object):
 
     def make_main_panel(self):
 
-        # create a panel in the frame
         main_pnl = self.main_pnl
         main_pnl.SetBackgroundColour(self.conf.get_attr("BACKGROUND_COLOR"))
 
         self.playback_slider = self.toggle_gauge_slider()
 
-        # and put some text with a larger bold font on it
-        label = "Hello " + self.api.get_display_name()
-        self.st = wx.StaticText(main_pnl, label=label, name="greetings")
-        self.st.SetForegroundColour(self.conf.get_attr("TEXT_COLOR"))
-
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        work_sizer = wx.BoxSizer(wx.HORIZONTAL)
         toolbar = self.build_audio_bar()
 
         main_sizer.Add(
             self.playback_slider,
             0,
             wx.ALL | wx.EXPAND,
-            1
+            0
         )
 
-        work_sizer.Add(
-            self.st,
-            0,
-            wx.ALIGN_LEFT | wx.TOP,
-            20
-        )
-
-        main_sizer.Add(
-            work_sizer
-        )
-
+        main_sizer.AddStretchSpacer(1)
         main_sizer.Add(
             toolbar,
-            0,
-            wx.TOP,
-            self.parent.GetSize()[1] - 120
+            0
         )
-
-        font = self.st.GetFont()
-        font.PointSize += 10
-        font = font.Bold()
-        self.st.SetFont(font)
 
         main_pnl.SetSizer(main_sizer)
 
@@ -159,9 +134,3 @@ class MainPanel(object):
 
     def enable_play_button(self):
         self.play_pause_btn.Enable(True)
-
-    def change_greeting_message(self, message=None):
-        if message is None:
-            self.st.SetLabel("Hello None")
-        else:
-            self.st.SetLabel("Hello " + message)

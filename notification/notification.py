@@ -18,7 +18,7 @@ class NotificationDelegator(NSObject):
 delegator = NotificationDelegator.alloc().init()
 
 
-def notify(title, subtitle, info_text, delay=1, sound=False, userInfo={}):
+def notify(title="", subtitle="", info_text="", delay=1, sound=False, userInfo={}):
     """ Python method to show a desktop notification on Mountain Lion. Where:
         title: Title of notification
         subtitle: Subtitle of notification
