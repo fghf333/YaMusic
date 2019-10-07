@@ -8,11 +8,6 @@ from notification.notification import notify
 from player import Player
 
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG,
-#                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-
 class Window(wx.Frame):
 
     def __init__(self, *args, **kw):
@@ -48,10 +43,7 @@ class Window(wx.Frame):
 
     def make_menu(self):
 
-        # Make a file menu with Hello and Exit items
         self.account_menu = wx.Menu()
-        # The "\t..." syntax defines an accelerator key that also triggers
-        # the same event
         if self.api.is_logged_in():
             logout = self.account_menu.Append(1, "&Logout\tCtrl-L", "Logout from account")
             self.Bind(wx.EVT_MENU, self.login.on_logout_menu, logout)
@@ -73,25 +65,16 @@ class Window(wx.Frame):
             self.playlist_selection.Enable(False)
             pass
 
-        # Now a help menu for the about item
         help_menu = wx.Menu()
         about_item = help_menu.Append(wx.ID_ABOUT)
 
-        # Make the menu bar and add the two menus to it. The "&" defines
-        # that the next letter is the "mnemonic" for the menu item. On the
-        # platforms that support it those letters are underlined and can be
-        # triggered from the keyboard.
         menu_bar = wx.MenuBar()
         menu_bar.Append(self.account_menu, "Account")
         menu_bar.Append(player_menu, "Player")
         menu_bar.Append(help_menu, "Help")
 
-        # Give the menu bar to the frame
         self.SetMenuBar(menu_bar)
 
-        # Finally, associate a handler function with the EVT_MENU event for
-        # each of the menu items. That means that when that menu item is
-        # activated then the associated handler function will be called.
         self.Bind(wx.EVT_MENU, self.on_about, about_item)
 
     def on_first_track(self, event):
