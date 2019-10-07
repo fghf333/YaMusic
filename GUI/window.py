@@ -21,16 +21,19 @@ class Window(wx.Frame):
 
         self.conf = Configs()
         self.api = YandexAPI()
-        self.login = login.Login(self)
         self.builders = builders.Builders()
         self.panel = main_panel.MainPanel(self)
+        self.login = login.Login(self)
 
         self.SetTitle(self.conf.get_attr("APP_TITLE"))
-        self.st = wx.StaticText()
         self.main_pnl = self.panel.make_main_panel()
         self.input = wx.TextCtrl()
         self.gauge = self.panel.playback_slider
         self.player = Player(parent=self.main_pnl, slider=self.gauge)
+        self.playlists_list = None
+        self.account_menu = None
+        self.playlist_selection = None
+        self.playlists = None
 
         self.Bind(events.FIRST_TRACK_APPEAR, self.on_first_track)
         self.Bind(events.PLAYLIST_READY, self.on_playlist_ready)

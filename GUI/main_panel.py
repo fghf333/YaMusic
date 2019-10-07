@@ -23,8 +23,9 @@ class MainPanel(object):
             self.bitmapDir = os.path.join(self.dirName, 'assets')
         pass
 
+        self.main_pnl = wx.Panel(parent)
+        self.st = wx.StaticText()
         self.playback_slider = None
-        self.main_pnl = None
         self.play_pause_btn = None
         self.next_track = None
         self.prev_track = None
@@ -51,15 +52,15 @@ class MainPanel(object):
     def make_main_panel(self):
 
         # create a panel in the frame
-        main_pnl = self.main_pnl = wx.Panel(self.parent)
+        main_pnl = self.main_pnl
         main_pnl.SetBackgroundColour(self.conf.get_attr("BACKGROUND_COLOR"))
 
         self.playback_slider = self.toggle_gauge_slider()
 
         # and put some text with a larger bold font on it
         label = "Hello " + self.api.get_display_name()
-        self.parent.st = wx.StaticText(main_pnl, label=label, name="greetings")
-        self.parent.st.SetForegroundColour(self.conf.get_attr("TEXT_COLOR"))
+        self.st = wx.StaticText(main_pnl, label=label, name="greetings")
+        self.st.SetForegroundColour(self.conf.get_attr("TEXT_COLOR"))
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         work_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -73,7 +74,7 @@ class MainPanel(object):
         )
 
         work_sizer.Add(
-            self.parent.st,
+            self.st,
             0,
             wx.ALIGN_LEFT | wx.TOP,
             20
@@ -90,10 +91,10 @@ class MainPanel(object):
             self.parent.GetSize()[1] - 120
         )
 
-        font = self.parent.st.GetFont()
+        font = self.st.GetFont()
         font.PointSize += 10
         font = font.Bold()
-        self.parent.st.SetFont(font)
+        self.st.SetFont(font)
 
         main_pnl.SetSizer(main_sizer)
 
@@ -158,3 +159,9 @@ class MainPanel(object):
 
     def enable_play_button(self):
         self.play_pause_btn.Enable(True)
+
+    def change_greeting_message(self, message=None):
+        if message is None:
+            self.st.SetLabel("Hello None")
+        else:
+            self.st.SetLabel("Hello " + message)

@@ -15,6 +15,7 @@ class Login(object):
         self.validation_error = wx.StaticText()
         self.sizer = wx.BoxSizer()
         self.dialog = wx.Dialog()
+        self.main_pnl = self.parent.panel
         pass
 
     def create_login_popup(self):
@@ -111,7 +112,7 @@ class Login(object):
             self.api.login(login=login, password=password)
             popup = self.parent.FindWindowByName("login_popup")
             popup.Destroy()
-            self.parent.st.SetLabel("Hello " + self.api.get_display_name())
+            self.main_pnl.change_greeting_message(self.api.get_display_name())
             self.parent.playlist_selection.Enable(True)
             self.parent.make_menu()
         except BadRequest as e:
@@ -122,9 +123,8 @@ class Login(object):
             login_button.Enable()
             event.Skip()
 
-
     def on_logout_menu(self, event):
         self.api.logout()
-        self.parent.st.SetLabel("Hello None")
+        self.main_pnl.change_greeting_message()
         self.create_login_popup()
         self.parent.make_menu()
