@@ -124,14 +124,12 @@ class YandexAPI(object):
 
         tracks = self.client.users_playlists(playlist.kind, playlist.owner.uid)[0].tracks
         index_file = json.load(open('{}/{}/index.json'.format(self.cache, list_type), 'r'))
-        playlist.downloadAnimatedCover('{}/{}.gif'.format(self.cache, list_type), size="100x100")
         index = 1
 
         for track in tracks:
 
             if index == 2:
                 wx.PostEvent(self.win, events.FirstTrackAppear(playlist_name=playlist.title, playlist_type=list_type))
-            index = index + 1
 
             full_track_info = track.track
             index_file['tracks'].append({
@@ -150,5 +148,7 @@ class YandexAPI(object):
 
             if index == 3:
                 break
+
+            index = index + 1
         wx.PostEvent(self.win, events.PlaylistReady(playlist_name=playlist.title, playlist_type=list_type))
         return

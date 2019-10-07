@@ -4,23 +4,24 @@ import os
 import wx
 import wx.media
 
+from notification.notification import notify
+
 
 class Player(object):
     def __init__(self, parent=None, slider=None):
-        self.frame = parent
+        self.parent = parent
         sp = wx.StandardPaths.Get()
         self.currentFolder = sp.GetDocumentsDir()
-        self.timer = wx.Timer(parent)
+        self.timer = wx.Timer(self.parent.main_pnl)
         self.timer.Start(100)
-        self.media_player = wx.media.MediaCtrl(parent, style=wx.SIMPLE_BORDER)
+        self.media_player = wx.media.MediaCtrl(self.parent.main_pnl, style=wx.SIMPLE_BORDER)
         self.slider = slider
-        self.parent = parent
         self.playlist = None
         self.tracks = []
         self.current_track = 0
         self.min = 1
         self.max = 1
-        for el in self.frame.GetChildren():
+        for el in self.parent.main_pnl.GetChildren():
             if el.GetName() == 'prev':
                 self.prev = el
             if el.GetName() == 'next':
@@ -50,6 +51,8 @@ class Player(object):
         for track in tracks:
             if track['num'] == self.current_track:
                 music_file = '{}/{}/{}.mp3'.format(self.cache, self.playlist, track['num'])
+                self.parent.song_band.SetLabel(track['artist'])
+                self.parent.song_name.SetLabel(track['title'])
 
                 if not self.media_player.Load(music_file):
                     wx.MessageBox("Unable to load %s: Unsupported format?" % music_file,
@@ -58,7 +61,10 @@ class Player(object):
                 else:
                     self.media_player.SetInitialSize()
                     self.slider.SetRange(0, self.media_player.Length())
-                    self.parent.Bind(wx.EVT_TIMER, self.on_timer)
+                    self.parent.main_pnl.Bind(wx.EVT_TIMER, self.on_timer)
+                    self.parent.play_pause_btn.SetToggle(True)
+                    notify(subtitle=track['artist'], info_text=track['title'])
+                    self.on_play()
         if self.current_track <= self.min:
             self.prev.Disable()
         else:
@@ -78,8 +84,8 @@ class Player(object):
     def on_pause(self, event):
         self.media_player.Pause()
 
-    def on_play(self, event):
-        if not event.GetIsDown():
+    def on_play(self, event=None):
+        if event is not None and not event.GetIsDown():
             self.on_pause(event)
             return
 
@@ -91,7 +97,8 @@ class Player(object):
             self.media_player.SetInitialSize()
             self.slider.SetRange(0, self.media_player.Length())
 
-        event.Skip()
+        if event is not None:
+            event.Skip()
 
     def on_seek(self, event):
         offset = self.slider.GetValue()

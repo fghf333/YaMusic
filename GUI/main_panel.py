@@ -24,6 +24,8 @@ class MainPanel(object):
         pass
 
         self.main_pnl = wx.Panel(parent)
+        self.song_band = None
+        self.song_name = None
         self.playback_slider = None
         self.play_pause_btn = None
         self.next_track = None
@@ -50,8 +52,7 @@ class MainPanel(object):
 
     def make_main_panel(self):
 
-        main_pnl = self.main_pnl
-        main_pnl.SetBackgroundColour(self.conf.get_attr("BACKGROUND_COLOR"))
+        self.main_pnl.SetBackgroundColour(self.conf.get_attr("BACKGROUND_COLOR"))
 
         self.playback_slider = self.toggle_gauge_slider()
 
@@ -80,9 +81,9 @@ class MainPanel(object):
             0
         )
 
-        main_pnl.SetSizer(main_sizer)
+        self.main_pnl.SetSizer(main_sizer)
 
-        return main_pnl
+        return self.main_pnl
 
     def build_audio_bar(self):
         """
@@ -98,6 +99,21 @@ class MainPanel(object):
             'size_h': 30,
             'size_w': 30
         })
+
+        self.song_band = self.builders.static_text_builder(parent=self.main_pnl, label="")
+        self.song_name = self.builders.static_text_builder(parent=self.main_pnl, label="")
+
+        song_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        song_sizer.Add(
+            self.song_band,
+            0
+        )
+
+        song_sizer.Add(
+            self.song_name,
+            0
+        )
 
         audio_bar_sizer.Add(
             self.prev_track,
@@ -133,6 +149,13 @@ class MainPanel(object):
 
         audio_bar_sizer.Add(
             self.next_track,
+            0
+        )
+
+        audio_bar_sizer.AddSpacer(5)
+
+        audio_bar_sizer.Add(
+            song_sizer,
             0
         )
 
