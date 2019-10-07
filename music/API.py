@@ -74,25 +74,21 @@ class YandexAPI(object):
         self.updating_thread = threading.Thread(target=self.update)
         self.list_type = list_type
         self.win = win
+        index = {
+            "date": date.today().__str__(),
+            "last_track_num": 1,
+            "tracks": []
+        }
+
         if not os.path.exists('{}/{}/'.format(self.cache, list_type)):
             os.mkdir('cache/{}'.format(list_type))
 
         if not os.path.exists('{}/{}/index.json'.format(self.cache, list_type)):
-            index = {
-                "date": date.today().__str__(),
-                "last_track_num": 1,
-                "tracks": []
-            }
             with open('{}/{}/index.json'.format(self.cache, list_type), 'w+') as file:
                 json.dump(index, file, indent=4)
             self.updating_thread.start()
         else:
             if self.is_need_update():
-                index = {
-                    "date": date.today().__str__(),
-                    "last_track_num": 1,
-                    "tracks": []
-                }
                 with open('{}/{}/index.json'.format(self.cache, list_type), 'w+') as file:
                     json.dump(index, file, indent=4)
                 self.updating_thread.start()
@@ -128,9 +124,15 @@ class YandexAPI(object):
 
         tracks = self.client.users_playlists(playlist.kind, playlist.owner.uid)[0].tracks
         index_file = json.load(open('{}/{}/index.json'.format(self.cache, list_type), 'r'))
+        playlist.downloadAnimatedCover('{}/{}.gif'.format(self.cache, list_type), size="100x100")
         index = 1
 
         for track in tracks:
+
+            if index == 2:
+                wx.PostEvent(self.win, events.FirstTrackAppear(playlist_name=playlist.title, playlist_type=list_type))
+            index = index + 1
+
             full_track_info = track.track
             index_file['tracks'].append({
                 "id": full_track_info.id,
@@ -145,10 +147,6 @@ class YandexAPI(object):
 
             track.track.download_cover('{}/{}/{}.png'.format(self.cache, list_type, index))
             track.track.download('{}/{}/{}.mp3'.format(self.cache, list_type, index), codec="mp3", bitrate_in_kbps=320)
-
-            if index == 2:
-                wx.PostEvent(self.win, events.FirstTrackAppear(playlist_name=playlist.title, playlist_type=list_type))
-            index = index + 1
 
             if index == 3:
                 break

@@ -56,6 +56,7 @@ class MainPanel(object):
         self.playback_slider = self.toggle_gauge_slider()
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
+
         toolbar = self.build_audio_bar()
 
         main_sizer.Add(
@@ -66,6 +67,14 @@ class MainPanel(object):
         )
 
         main_sizer.AddStretchSpacer(1)
+
+        main_sizer.Add(
+            self.playlist_list(),
+            0
+        )
+
+        main_sizer.AddStretchSpacer(1)
+
         main_sizer.Add(
             toolbar,
             0
@@ -134,3 +143,46 @@ class MainPanel(object):
 
     def enable_play_button(self):
         self.play_pause_btn.Enable(True)
+
+    def playlist_list(self):
+        playlists_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        playlists_sizer.AddSpacer(5)
+        playlists = [
+            {
+                "cover": "playlistOfTheDay",
+                "parent": self.main_pnl
+            },
+            {
+                "cover": "neverHeard",
+                "parent": self.main_pnl
+            },
+            {
+                "cover": "missedLikes",
+                "parent": self.main_pnl
+            },
+            {
+                "cover": "recentTracks",
+                "parent": self.main_pnl
+            }
+        ]
+        for playlist in playlists:
+            item = self.builders.build_playlist_cover(playlist)
+            playlists_sizer.Add(
+                item,
+                0
+            )
+            playlists_sizer.AddSpacer(5)
+            item.Bind(wx.EVT_ENTER_WINDOW, self.on_hover)
+            item.Bind(wx.EVT_LEAVE_WINDOW, self.on_unhover)
+            item.Bind(wx.EVT_LEFT_DOWN, self.on_click)
+        return playlists_sizer
+
+    def on_hover(self, event):
+        event.EventObject.Play()
+
+    def on_unhover(self, event):
+        event.EventObject.Stop()
+
+    def on_click(self, event):
+        playlist_type = event.EventObject.GetName()
+        self.api.preparation(playlist_type, self.parent)
