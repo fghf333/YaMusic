@@ -7,7 +7,7 @@ class Configs(object):
     def __new__(cls, *args, **kw):
         if not hasattr(cls, '_instance'):
             orig = super(Configs, cls)
-            cls._instance = orig.__new__(cls, *args, **kw)
+            cls._instance = orig.__new__(cls, **kw)
         return cls._instance
 
     def __init__(self):

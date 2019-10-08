@@ -11,7 +11,7 @@ class Builders(object):
     def __init__(self):
         self.conf = Configs()
         if 'RESOURCEPATH' in os.environ:
-            self.bitmapDir = '{}/assets'.format(os.environ['RESOURCEPATH'])
+            self.asset_dir = '{}/assets'.format(os.environ['RESOURCEPATH'])
         else:
             self.dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             self.asset_dir = os.path.join(self.dir_name, 'assets')

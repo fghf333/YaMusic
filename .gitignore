@@ -7,3 +7,4 @@ cache/*
 !cache/.gitkeep
 player2.py
 setup.py
+venv/*

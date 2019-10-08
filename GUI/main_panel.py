@@ -17,10 +17,10 @@ class MainPanel(object):
         self.builders = Builders()
 
         if 'RESOURCEPATH' in os.environ:
-            self.bitmapDir = '{}/assets'.format(os.environ['RESOURCEPATH'])
+            self.asset_dir = '{}/assets'.format(os.environ['RESOURCEPATH'])
         else:
-            self.dirName = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            self.bitmapDir = os.path.join(self.dirName, 'assets')
+            self.dir_name = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            self.asset_dir = os.path.join(self.dir_name, 'assets')
         pass
 
         self.main_pnl = wx.Panel(parent)
@@ -120,13 +120,13 @@ class MainPanel(object):
             0
         )
 
-        img = wx.Image(os.path.join(self.bitmapDir, "player_play.png"), wx.BITMAP_TYPE_ANY)
+        img = wx.Image(os.path.join(self.asset_dir, "player_play.png"), wx.BITMAP_TYPE_ANY)
         img = img.Scale(30, 30, wx.IMAGE_QUALITY_HIGH)
         img = wx.Bitmap(img)
         self.play_pause_btn = buttons.GenBitmapToggleButton(self.main_pnl, bitmap=img, name="play")
         self.play_pause_btn.Enable(False)
 
-        img = wx.Image(os.path.join(self.bitmapDir, "player_pause.png"), wx.BITMAP_TYPE_ANY)
+        img = wx.Image(os.path.join(self.asset_dir, "player_pause.png"), wx.BITMAP_TYPE_ANY)
         img = img.Scale(30, 30, wx.IMAGE_QUALITY_HIGH)
         img = wx.Bitmap(img)
         self.play_pause_btn.SetBitmapSelected(img)
@@ -200,12 +200,12 @@ class MainPanel(object):
             item.Bind(wx.EVT_LEFT_DOWN, self.on_click)
         return playlists_sizer
 
-    def on_hover(self, event):
-        event.EventObject.Play()
+    def on_click(self, event):
+        playlist_type = event.EventObject.GetName()
+        self.api.preparation(playlist_type, self.parent)
 
     def on_unhover(self, event):
         event.EventObject.Stop()
 
-    def on_click(self, event):
-        playlist_type = event.EventObject.GetName()
-        self.api.preparation(playlist_type, self.parent)
+    def on_hover(self, event):
+        event.EventObject.Play()

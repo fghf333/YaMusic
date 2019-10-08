@@ -12,7 +12,7 @@ from configs.configs import Configs
 
 class YandexAPI(object):
 
-    def __init__(self, *args, **kw):
+    def __init__(self):
         self.conf = Configs()
         self.client = self.login()
         self.win = None
@@ -30,7 +30,7 @@ class YandexAPI(object):
     def __new__(cls, *args, **kw):
         if not hasattr(cls, '_instance'):
             orig = super(YandexAPI, cls)
-            cls._instance = orig.__new__(cls, *args, **kw)
+            cls._instance = orig.__new__(cls)
         return cls._instance
 
     def login(self, login=None, password=None):
@@ -111,12 +111,14 @@ class YandexAPI(object):
                 return True
 
     def update(self):
-
+        print("Starting update")
         list_type = self.list_type
 
         blocks = self.client.landing(blocks="personalplaylists").blocks[0].entities
 
         playlist = ""
+
+        print("processing blocks")
 
         for block in blocks:
             if block.data.type == list_type:
@@ -125,6 +127,8 @@ class YandexAPI(object):
         tracks = self.client.users_playlists(playlist.kind, playlist.owner.uid)[0].tracks
         index_file = json.load(open('{}/{}/index.json'.format(self.cache, list_type), 'r'))
         index = 1
+
+        print("processing tracks")
 
         for track in tracks:
 
@@ -150,5 +154,6 @@ class YandexAPI(object):
                 break
 
             index = index + 1
+        print("finishing updating")
         wx.PostEvent(self.win, events.PlaylistReady(playlist_name=playlist.title, playlist_type=list_type))
-        return
+        return True

@@ -7,18 +7,18 @@ NSObject = objc.lookUpClass("NSObject")
 
 class NotificationDelegator(NSObject):
 
-    def userNotificationCenter_didActivateNotification_(self, center, notification):
-        print("Activate notification")
-
     def userNotificationCenter_shouldPresentNotification_(self, center, notification):
         print("Should present notification")
         return True
+
+    def userNotificationCenter_didActivateNotification_(self, center, notification):
+        print("Activate notification")
 
 
 delegator = NotificationDelegator.alloc().init()
 
 
-def notify(title="", subtitle="", info_text="", delay=1, sound=False, userInfo={}):
+def notify(title="", subtitle="", info_text="", delay=1, sound=False, userInfo=None):
     """ Python method to show a desktop notification on Mountain Lion. Where:
         title: Title of notification
         subtitle: Subtitle of notification
@@ -28,6 +28,8 @@ def notify(title="", subtitle="", info_text="", delay=1, sound=False, userInfo={
         userInfo: a dictionary that can be used to handle clicks in your
                   app"s applicationDidFinishLaunching:aNotification method
     """
+    if userInfo is None:
+        userInfo = {}
     notification = NSUserNotification.alloc().init()
     notification.setTitle_(title)
     notification.setSubtitle_(subtitle)

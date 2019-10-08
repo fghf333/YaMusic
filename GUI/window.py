@@ -120,7 +120,7 @@ class Window(wx.Frame):
         self.api.preparation(playlist_type, self)
 
     def on_exit(self, event):
-        self.Close(True)
+        self.Close()
 
     def on_about(self, event):
         wx.MessageBox("This is a wxPython Hello World sample",

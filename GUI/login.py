@@ -102,7 +102,7 @@ class Login(object):
         if self.api.is_logged_in() is True:
             event.Skip(True)
         else:
-            self.parent.Close(True)
+            self.parent.on_exit(event)
 
     def on_login(self, event):
         login_button = self.parent.FindWindowByName("login_button")
