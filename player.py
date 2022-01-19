@@ -32,7 +32,14 @@ class Player(object):
         else:
             self.dirName = os.path.dirname(os.path.abspath(__file__))
             self.cache = os.path.join(self.dirName, 'cache')
+        self.parent.main_pnl.Bind(wx.media.EVT_MEDIA_LOADED, self.on_loaded)
         pass
+
+    def on_loaded(self, event):
+        self.slider.SetRange(0, self.media_player.Length())
+        self.parent.main_pnl.Bind(wx.EVT_TIMER, self.on_timer)
+        self.parent.play_pause_btn.SetToggle(True)
+        self.on_play()
 
     def load_playlist(self, playlist):
         self.playlist = playlist
@@ -59,12 +66,7 @@ class Player(object):
                                   "ERROR",
                                   wx.ICON_ERROR | wx.OK)
                 else:
-                    self.media_player.SetInitialSize()
-                    self.slider.SetRange(0, self.media_player.Length())
-                    self.parent.main_pnl.Bind(wx.EVT_TIMER, self.on_timer)
-                    self.parent.play_pause_btn.SetToggle(True)
                     notify(subtitle=track['artist'], info_text=track['title'])
-                    self.on_play()
         if self.current_track <= self.min:
             self.prev.Disable()
         else:
@@ -72,13 +74,17 @@ class Player(object):
 
         if self.current_track >= self.max:
             self.next.Disable()
+            self.media_player.Pause()
         else:
             self.next.Enable()
 
     def on_timer(self, event):
+        if not self.media_player.Length():
+            event.Skip()
+            return
         offset = self.media_player.Tell()
         self.slider.SetValue(offset)
-        if offset == self.media_player.Length():
+        if offset >= self.media_player.Length():
             self.on_next(event)
 
     def on_pause(self, event):
@@ -95,7 +101,6 @@ class Player(object):
                           wx.ICON_ERROR | wx.OK)
         else:
             self.media_player.SetInitialSize()
-            self.slider.SetRange(0, self.media_player.Length())
 
         if event is not None:
             event.Skip()

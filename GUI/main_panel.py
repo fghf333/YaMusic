@@ -24,6 +24,8 @@ class MainPanel(object):
         pass
 
         self.main_pnl = wx.Panel(parent)
+        self.playlists_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.playlist_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.song_band = None
         self.song_name = None
         self.playback_slider = None
@@ -63,22 +65,33 @@ class MainPanel(object):
         main_sizer.Add(
             self.playback_slider,
             0,
-            wx.ALL | wx.EXPAND,
-            0
+                wx.ALL | wx.EXPAND,
+                0
         )
 
         main_sizer.AddStretchSpacer(1)
 
         main_sizer.Add(
-            self.playlist_list(),
-            0
+                self.playlist_list_sizer(),
+                0
+        )
+
+        main_sizer.Add(
+                self.playlist_sizer
         )
 
         main_sizer.AddStretchSpacer(1)
 
+        # main_sizer.Add(
+        #         self.builders.build_cover({
+        #         "cover": "playlistOfTheDay",
+        #         "parent": self.main_pnl
+        #     })
+        # )
+
         main_sizer.Add(
-            toolbar,
-            0
+                toolbar,
+                0
         )
 
         self.main_pnl.SetSizer(main_sizer)
@@ -167,9 +180,8 @@ class MainPanel(object):
     def enable_play_button(self):
         self.play_pause_btn.Enable(True)
 
-    def playlist_list(self):
-        playlists_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        playlists_sizer.AddSpacer(5)
+    def playlist_list_sizer(self):
+        self.playlists_sizer.AddSpacer(5)
         playlists = [
             {
                 "cover": "playlistOfTheDay",
@@ -190,22 +202,23 @@ class MainPanel(object):
         ]
         for playlist in playlists:
             item = self.builders.build_playlist_cover(playlist)
-            playlists_sizer.Add(
-                item,
-                0
+            self.playlists_sizer.Add(
+                    item,
+                    0
             )
-            playlists_sizer.AddSpacer(5)
-            item.Bind(wx.EVT_ENTER_WINDOW, self.on_hover)
-            item.Bind(wx.EVT_LEAVE_WINDOW, self.on_unhover)
-            item.Bind(wx.EVT_LEFT_DOWN, self.on_click)
-        return playlists_sizer
+            self.playlists_sizer.AddSpacer(5)
+            item.Bind(wx.EVT_ENTER_WINDOW, self.on_playlist_hover)
+            item.Bind(wx.EVT_LEAVE_WINDOW, self.on_playlist_unhover)
+            item.Bind(wx.EVT_LEFT_DOWN, self.on_playlist_click)
+        return self.playlists_sizer
 
-    def on_click(self, event):
+    def on_playlist_click(self, event):
         playlist_type = event.EventObject.GetName()
+        self.playlists_sizer.ShowItems(False)
         self.api.preparation(playlist_type, self.parent)
 
-    def on_unhover(self, event):
+    def on_playlist_unhover(self, event):
         event.EventObject.Stop()
 
-    def on_hover(self, event):
+    def on_playlist_hover(self, event):
         event.EventObject.Play()

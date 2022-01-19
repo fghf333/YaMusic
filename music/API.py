@@ -5,6 +5,7 @@ from datetime import date, datetime
 
 import wx
 from yandex_music.client import Client
+from yandex_music.exceptions import Captcha
 
 import events.events as events
 from configs.configs import Configs
@@ -37,16 +38,29 @@ class YandexAPI(object):
         if self.conf.get_attr("token") is not False:
             client = Client().from_token(self.conf.get_attr("token"))
         elif login is not None and password is not None:
-            client = Client().from_credentials(login, password)
+            client = captcha_key = captcha_image_url = captcha_answer = None
+            while not client:
+                try:
+                    client = Client.from_credentials(login, password, captcha_answer, captcha_key)
+                except Captcha as e:
+                    if e.captcha.x_captcha_url:
+                        captcha_image_url = e.captcha.x_captcha_url
+                        captcha_key = e.captcha.x_captcha_key
+                    else:
+                        print('Вы отправили ответ не посмотрев на картинку..')
+
+                    captcha_answer = input(f'{captcha_image_url}\nВведите код с картинки: ')
+
             token = client.token
             self.conf.set_attr("token", token)
+            return client
         else:
             client = Client()
         self.client = client
         return client
 
     def is_logged_in(self):
-        if self.client.account.display_name is None:
+        if self.client.me.account.display_name is None:
             return False
         else:
             return True
@@ -57,7 +71,7 @@ class YandexAPI(object):
         pass
 
     def get_display_name(self):
-        return str(self.login().account.display_name)
+        return str(self.login().me.account.display_name)
 
     def get_play_lists_list(self):
         entities = self.client.landing(blocks="personalplaylists").blocks[0].entities
@@ -124,7 +138,7 @@ class YandexAPI(object):
             if block.data.type == list_type:
                 playlist = block.data.data
 
-        tracks = self.client.users_playlists(playlist.kind, playlist.owner.uid)[0].tracks
+        tracks = self.client.users_playlists(playlist.kind, playlist.owner.uid).tracks
         index_file = json.load(open('{}/{}/index.json'.format(self.cache, list_type), 'r'))
         index = 1
 
