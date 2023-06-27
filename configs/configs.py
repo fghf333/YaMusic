@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 
 
 class Configs(object):
@@ -18,8 +19,12 @@ class Configs(object):
             self.dirName = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             self.conf_file_path = os.path.join(self.dirName, 'configs')
         pass
+        conf_file_path = '{}/configs.json'.format(self.conf_file_path)
 
-        conf_file_read = open('{}/configs.json'.format(self.conf_file_path), "r+")
+        if not os.path.isfile(conf_file_path):
+            shutil.copyfile('{}/configs.json.dist'.format(self.conf_file_path), conf_file_path)
+
+        conf_file_read = open(conf_file_path, "r+")
         self.confs = json.load(conf_file_read)
         conf_file_read.close()
 

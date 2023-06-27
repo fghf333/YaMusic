@@ -5,7 +5,6 @@ from datetime import date, datetime
 
 import wx
 from yandex_music.client import Client
-from yandex_music.exceptions import Captcha
 
 import events.events as events
 from configs.configs import Configs
@@ -36,18 +35,18 @@ class YandexAPI(object):
 
     def login(self, login=None, password=None):
         if self.conf.get_attr("token") is not False:
-            client = Client().from_token(self.conf.get_attr("token"))
+            client = Client(self.conf.get_attr("token")).init()
         elif login is not None and password is not None:
             client = captcha_key = captcha_image_url = captcha_answer = None
             while not client:
                 try:
                     client = Client.from_credentials(login, password, captcha_answer, captcha_key)
-                except Captcha as e:
+                except Exception as e:
                     if e.captcha.x_captcha_url:
                         captcha_image_url = e.captcha.x_captcha_url
                         captcha_key = e.captcha.x_captcha_key
                     else:
-                        print('Вы отправили ответ не посмотрев на картинку..')
+                        print('Вы отправили ответ не посмотрев на картинку.')
 
                     captcha_answer = input(f'{captcha_image_url}\nВведите код с картинки: ')
 
