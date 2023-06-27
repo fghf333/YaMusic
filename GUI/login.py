@@ -1,5 +1,7 @@
+from urllib.parse import urlparse, parse_qs
+
 import wx
-from yandex_music.exceptions import BadRequest
+import wx.html2 as webview
 
 from GUI.builders import Builders
 from configs.configs import Configs
@@ -17,114 +19,48 @@ class Login(object):
         self.sizer = wx.BoxSizer()
         self.dialog = wx.Dialog()
         self.main_pnl = self.parent.panel
-        pass
+        self.url = "https://oauth.yandex.ru/authorize?response_type=token&client_id=23cabbbdc6cd418abb4b39c32c41195d"
+        self.wv = None
+        self.backend = self.getBackend()
+        self.panel = None
 
     def create_login_popup(self):
-        self.dialog = dialog = wx.Dialog(self.parent, wx.ID_ANY, "", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
-                                         name="login_popup")
-        self.sizer = sizer = wx.BoxSizer(wx.VERTICAL)
-        dialog.BackgroundColour = self.conf.get_attr("BACKGROUND_COLOR")
-
-        text = self.builders.static_text_builder(dialog, label="Please login")
-
-        font = text.GetFont()
-        font.PointSize += 10
-        font = font.Bold()
-        text.SetFont(font)
-
-        login_label = self.builders.static_text_builder(dialog, label="Login:")
-        login_input = self.builders.input_builder(dialog, name="login_input")
-
-        password_label = self.builders.static_text_builder(dialog, label="Password:")
-        password_input = self.builders.input_builder(dialog, name="password_input")
-
-        login_button = self.builders.button_builder(dialog, "Login", "login_button")
-        login_button.Bind(wx.EVT_BUTTON, self.on_login)
-
-        self.validation_error = self.builders.static_text_builder(dialog, label="")
-        self.validation_error.SetForegroundColour(wx.RED)
-
-        sizer.Add(
-            text,
-            0,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP,
-            20
-        )
-
-        sizer.Add(
-            login_label,
-            0,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP,
-            5
-        )
-
-        sizer.Add(
-            login_input,
-            0,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP,
-            10
-        )
-
-        sizer.Add(
-            password_label,
-            0,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP,
-            5
-        )
-
-        sizer.Add(
-            password_input,
-            0,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP,
-            10
-        )
-
-        sizer.Add(
-            login_button,
-            0,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP,
-            10
-        )
-
-        self.sizer.Add(
-            self.validation_error,
-            1,
-            wx.ALIGN_CENTER_HORIZONTAL | wx.TOP,
-            5
-        )
-
+        self.dialog = dialog = wx.Dialog(parent=self.parent, id=wx.ID_ANY,
+                                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+                                         name="login_popup_test")
+        self.wv = webview.WebView.New(self.dialog, backend=self.backend)
+        self.dialog.Bind(webview.EVT_WEBVIEW_NAVIGATING, self.OnWebViewNavigating, self.wv)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.wv, 1, wx.EXPAND)
         dialog.SetSizer(sizer)
-        dialog.Bind(wx.EVT_CLOSE, self.on_popup_close)
+        self.wv.LoadURL(self.url)
         dialog.Center()
         dialog.Show()
-
-    def on_popup_close(self, event):
-        if self.api.is_logged_in() is True:
-            event.Skip(True)
-        else:
-            self.parent.on_exit(event)
-
-    def on_login(self, event):
-        login_button = self.parent.FindWindowByName("login_button")
-        login_button.Disable()
-        login = self.parent.FindWindowByName("login_input").GetValue()
-        password = self.parent.FindWindowByName("password_input").GetValue()
-        try:
-            self.api.login(login=login, password=password)
-            popup = self.parent.FindWindowByName("login_popup")
-            popup.Destroy()
-            notify(subtitle="Hello " + self.api.get_display_name())
-            self.parent.playlist_selection.Enable(True)
-            self.parent.make_menu()
-        except BadRequest as e:
-            self.validation_error.SetLabel(str(e))
-            size = self.dialog.GetSize()
-            self.dialog.SetInitialSize()
-            self.dialog.SetSize(size)
-            login_button.Enable()
-            event.Skip()
 
     def on_logout_menu(self, event):
         self.api.logout()
         self.create_login_popup()
         self.parent.make_menu()
+
+    def OnWebViewNavigating(self, event):
+        if "access_token" in event.GetURL():
+            event.Veto()
+            qs = parse_qs(urlparse(event.GetURL().replace('#access_token', '?access_token')).query)
+            self.conf.set_attr('token', qs['access_token'][0])
+            self.conf.set_attr('token_exp', qs['expires_in'][0])
+            self.api.login()
+            notify(subtitle="Hello " + self.api.get_display_name())
+            self.dialog.Destroy()
+
+    def getBackend(self):
+        backends = [
+            (webview.WebViewBackendEdge, 'WebViewBackendEdge'),
+            (webview.WebViewBackendIE, 'WebViewBackendIE'),
+            (webview.WebViewBackendWebKit, 'WebViewBackendWebKit'),
+            (webview.WebViewBackendDefault, 'WebViewBackendDefault'),
+        ]
+        for identifier, name in backends:
+            available = webview.WebView.IsBackendAvailable(identifier)
+            if available:
+                print("Using backend: '{}'\n".format(str(identifier, 'ascii')))
+                return identifier

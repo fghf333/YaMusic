@@ -9,3 +9,4 @@ player2.py
 setup.py
 venv/*
 .eggs/*
+configs/configs.json
